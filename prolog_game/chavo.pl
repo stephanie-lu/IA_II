@@ -1,0 +1,118 @@
+/* chavo.pl
+  chavo del 8's characters identification game.
+
+    start with ?- go.     */
+
+go :- hypothesize(X),
+      write('Supongo que el personaje es: '),
+      write(X),
+      nl,
+      undo.
+
+/* hypotheses to be tested */
+hypothesize(chavo)   :- chavo, !.
+hypothesize(don_ramon)     :- don_ramon, !.
+hypothesize(quico)   :- quico, !.
+hypothesize(florinda)     :- florinda, !.
+hypothesize(sr_barriga)   :- sr_barriga, !.
+hypothesize(profesor_girafales)   :- profesor_girafales, !.
+hypothesize(chilindrina) :- chilindrina, !.
+hypothesize(clotilde) :- clotilde, !.
+hypothesize(nono) :- nono, !.
+hypothesize(popis) :- popis, !.
+hypothesize(unknown).             /* no diagnosis */
+
+/* character identification rules */
+chavo :- menor,
+	     hombre,
+         huerfano.
+quico :- menor,
+         hombre,
+         con_madre,
+		 verify(se_queja_a_su_mama),
+         verify(es_cacheton).
+nono :-  menor,
+		 hombre,
+		 con_padre,
+		 verify(es_gordito),
+		 verify(es_hijo_del_dueno_de_la_vecindad).
+chilindrina :- menor,
+			   mujer,
+			   con_padre,
+			   verify(usa_anteojos),
+			   verify(es_chimuela).
+popis :- menor,
+         mujer,
+		 con_madre,
+		 verify(siempre_utiliza_una_muneca),
+		 verify(es_sobrina_de_florinda).
+
+don_ramon:- adulto,
+			hombre,
+			verify(le_debe_dinero_al_sr_barriga),
+			verify(es_el_padre_de_la_chilindrina).
+florinda:- adulto,
+		    mujer,
+			pareja,
+			verify(suele_abofetear_a_don_ramon),
+			verify(suele_estar_malhumorada),
+			verify(esta_enamorando_con_girafales).
+sr_barriga:- adulto,
+			 hombre,
+			 verify(dueno_de_la_vecindad),
+			 verify(es_gordito).
+profesor_girafales:- adulto,
+					 hombre,
+					 pareja,
+					 verify(es_maestro_de_una_escuela),
+					 verify(esta_enamorando_con_florinda).
+clotilde:- adulto,
+			mujer,
+			verify(esta_enamorada_de_don_ramon),
+			verify(le_dicen_bruja_del_71).
+
+
+/* classification rules */
+
+menor    :- verify(es_menor), !.
+huerfano :- menor,
+			verify(es_huerfano), !.
+con_madre :- menor,
+			 verify(tiene_madre), !.
+con_padre :- menor,
+			 verify(tiene_padre), !.
+adulto    :- not(menor),!.
+pareja   :- adulto,
+			verify(tiene_pareja), !.
+hombre   :- verify(es_hombre), !.
+mujer    :- not(hombre), !.
+
+
+/* how to ask questions */
+ask(Question) :-
+    write('Este personaje: '),
+    write(Question),
+    write('? '),
+    read(Response),
+    nl,
+    ( (Response == yes ; Response == y)
+      ->
+       assert(yes(Question)) ;
+       assert(no(Question)), fail).
+
+:- dynamic yes/1,no/1.
+
+/* How to verify something */
+verify(S) :-
+   (yes(S)
+    ->
+    true ;
+    (no(S)
+     ->
+     fail ;
+     ask(S))).
+
+/* undo all yes/no assertions */
+undo :- retract(yes(_)),fail.
+undo :- retract(no(_)),fail.
+undo.
